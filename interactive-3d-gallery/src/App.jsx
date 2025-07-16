@@ -6,18 +6,21 @@ import { Environment } from '@react-three/drei';
 
 import { SphereGallery } from './components/SphereGallery';
 import { UIControls } from './components/UIControls';
-import { PhysicsStepper } from './hooks/useSpherePhysics'; // Import PhysicsStepper
-import { useConfigLoader } from './utils/dataLoader'; // Import our new hook
+import { DetailViewport } from './components/DetailViewport';
+import { useConfigLoader } from './utils/dataLoader';
+import { PhysicsStepper } from './hooks/useSpherePhysics';
 
 import './index.css';
 
+// Extend ConfigContext to include physics control
 export const ConfigContext = createContext(null);
 
 function App() {
   const { config, loading, error } = useConfigLoader();
-  const [currentConfig, setCurrentConfig] = useState(null); // Local state to manage active config
+  const [currentConfig, setCurrentConfig] = useState(null);
+  const [isPhysicsPaused, setIsPhysicsPaused] = useState(false);
+  const [selectedImageId, setSelectedImageId] = useState(null);
 
-  // Set currentConfig once the config is loaded
   useEffect(() => {
     if (config) {
       setCurrentConfig(config);
@@ -41,16 +44,28 @@ function App() {
   }
 
   if (!currentConfig) {
-    return null; // Or a more detailed loading state
+    return null;
   }
 
-  // We'll pass `currentConfig` and `setCurrentConfig` down through context
-  // This will allow `UIControls` to change the active catalog/sphere material
-  // and for `SphereGallery` to react to those changes.
   const configContextValue = {
     config: currentConfig,
-    setCurrentConfig, // Allow updating global config, e.g., changing active catalog/sphere
+    setCurrentConfig,
+    isPhysicsPaused,
+    setIsPhysicsPaused,
+    selectedImageId,
+    setSelectedImageId,
   };
+
+  // Find the currently selected image's full data
+  const currentCatalog = currentConfig.catalogs.find(
+    (c) => c.id === currentConfig.appSettings.initialCatalogId
+  );
+  const fullSelectedImageData = selectedImageId
+    ? currentCatalog?.images.find(img => img.name === selectedImageId)
+    : null;
+  const fullSelectedImageUrl = fullSelectedImageData
+    ? `/images/${currentCatalog.folderName}/${fullSelectedImageData.file}`
+    : null;
 
   return (
     <div className="App" style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
@@ -59,19 +74,44 @@ function App() {
           camera={{ position: [0, 0, currentConfig.appSettings.sphereRadius * 2], fov: 60 }}
           dpr={[1, 2]}
           shadows
-          gl={{ antialias: true }}
-          onError={(error) => {
-            console.error('Canvas error:', error);
-          }}
         >
           <Perf position="top-left" />
           <ambientLight intensity={0.5} />
           <directionalLight position={[5, 10, 5]} intensity={1} castShadow />
           <Environment preset="city" background />
-          <PhysicsStepper /> {/* Add the global physics stepper */}
+          <PhysicsStepper />
           <SphereGallery />
         </Canvas>
         <UIControls />
+        
+        {/* Control Instructions Overlay */}
+        <div style={{
+          position: 'absolute',
+          bottom: '20px',
+          left: '20px',
+          background: 'rgba(0, 0, 0, 0.8)',
+          color: 'white',
+          padding: '15px',
+          borderRadius: '8px',
+          fontSize: '14px',
+          fontFamily: 'Arial, sans-serif',
+          maxWidth: '300px',
+          zIndex: 1000
+        }}>
+          <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>Controls:</div>
+          <div style={{ marginBottom: '5px' }}>• <strong>Drag sphere</strong> to rotate</div>
+          <div style={{ marginBottom: '5px' }}>• <strong>Click image</strong> to view details</div>
+          <div style={{ marginBottom: '5px' }}>• <strong>Mouse Wheel</strong> - Move focused image closer/further</div>
+          <div style={{ fontSize: '12px', opacity: '0.8', marginTop: '8px' }}>
+            Spin the globe to position images in front of the camera, then use mouse wheel to adjust image distance from sphere surface.
+          </div>
+        </div>
+
+        <DetailViewport
+            isOpen={selectedImageId !== null}
+            imageUrl={fullSelectedImageUrl}
+            imageName={fullSelectedImageData?.name}
+        />
       </ConfigContext.Provider>
     </div>
   );

@@ -23,7 +23,8 @@ const bodies = []; // Array to hold all physics bodies created by this hook
  */
 export function useSpherePhysics(meshRef, radius, mass = 1, wobbleIntensity) {
   const body = useRef(null);
-  const { config } = useContext(ConfigContext);
+  // No need to directly use config here as wobbleIntensity is passed as prop
+  // const { config } = useContext(ConfigContext);
 
   useEffect(() => {
     if (!meshRef.current) return;
@@ -66,7 +67,9 @@ export function useSpherePhysics(meshRef, radius, mass = 1, wobbleIntensity) {
         new CANNON.Vec3(0, 0, 0) // Apply force at the center of the body
       );
 
-      // Synchronize Three.js mesh with Cannon.js body
+      // Synchronization will happen in PhysicsStepper only if not paused
+      // For now, let's keep visual sync here, but the body's movement
+      // will only be updated if PhysicsStepper is active.
       meshRef.current.position.copy(body.current.position);
       meshRef.current.quaternion.copy(body.current.quaternion);
 
@@ -88,7 +91,14 @@ export function useSpherePhysics(meshRef, radius, mass = 1, wobbleIntensity) {
 // This hook ensures that the physics simulation is updated regardless of
 // whether the individual sphere is interacting or not.
 export function PhysicsStepper() {
+  const { isPhysicsPaused } = useContext(ConfigContext); // Access pause state
+
   useFrame(() => {
+    if (isPhysicsPaused) {
+      // console.log("Physics: PAUSED");
+      return; // Do not step physics world if paused
+    }
+
     const currentTime = performance.now() / 1000;
     let dt = currentTime - lastCallTime;
     lastCallTime = currentTime;

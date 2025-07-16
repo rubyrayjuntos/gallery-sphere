@@ -94,6 +94,10 @@ export function UIControls() {
     console.log('Simulated left arrow movement');
   };
 
+  // Test control panel hidden - uncomment below to show for debugging
+  return null;
+  
+  /*
   return (
     <div style={{
       position: 'absolute',
@@ -176,4 +180,5 @@ export function UIControls() {
       </div>
     </div>
   );
+  */
 } 
