@@ -1,0 +1,64 @@
+{
+  "appSettings": {
+    "initialCatalogId": "nature",
+    "initialSphereTextureId": "matte",
+    "sphereRadius": 5,
+    "imagePlaneSize": 1.2,
+    "imagePopOutDistance": 0.2,
+    "imageEnlargeScale": 1.5,
+    "wobbleIntensity": 0.005,
+    "dragSensitivity": 25
+  },
+  "catalogs": [
+    {
+      "id": "nature",
+      "name": "Nature Photos",
+      "folderName": "catalog_nature",
+      "images": [
+        { "name": "forest", "file": "forest.jpg" },
+        { "name": "mountains", "file": "mountains.jpg" },
+        { "name": "waterfall", "file": "waterfall.jpg" }
+      ]
+    },
+    {
+      "id": "abstract",
+      "name": "Abstract Art",
+      "folderName": "catalog_abstract",
+      "images": [
+        { "name": "abstract1", "file": "abstract1.jpg" },
+        { "name": "abstract2", "file": "abstract2.jpg" }
+      ]
+    }
+  ],
+  "spheres": [
+    {
+      "id": "matte",
+      "name": "Matte Finish",
+      "texture": "sphere_matte.jpg",
+      "materialProps": {
+        "roughness": 0.8,
+        "metalness": 0.0
+      }
+    },
+    {
+      "id": "metal",
+      "name": "Metallic Finish",
+      "texture": "sphere_metal.jpg",
+      "materialProps": {
+        "roughness": 0.2,
+        "metalness": 0.9
+      }
+    },
+    {
+      "id": "textured",
+      "name": "Textured Surface",
+      "texture": "sphere_textured.jpg",
+      "materialProps": {
+        "roughness": 0.5,
+        "metalness": 0.1,
+        "bumpMap": "sphere_bump.jpg",
+        "bumpScale": 0.05
+      }
+    }
+  ]
+} 
