@@ -2,15 +2,24 @@ services:
   - type: web
     name: interactive-3d-gallery
     env: static
-    buildCommand: cd interactive-3d-gallery && npm install --no-audit --no-fund && npm run build
+    buildCommand: |
+      cd interactive-3d-gallery
+      rm -rf node_modules package-lock.json
+      npm cache clean --force
+      npm install --legacy-peer-deps --no-audit --no-fund --production=false
+      npm run build
     staticPublishPath: ./interactive-3d-gallery/dist
     envVars:
       - key: NODE_VERSION
-        value: 18
+        value: "18"
+      - key: NPM_CONFIG_LEGACY_PEER_DEPS
+        value: "true"
       - key: NPM_CONFIG_AUDIT
         value: "false"
       - key: NPM_CONFIG_FUND
         value: "false"
+      - key: CI
+        value: "true"
     headers:
       - path: /*
         name: X-Frame-Options

@@ -1,11 +1,21 @@
 {
+  "name": "gallery-sphere-deploy",
+  "private": true,
+  "scripts": {
+    "build": "cd interactive-3d-gallery && npm install --legacy-peer-deps --no-audit --no-fund && npm run build",
+    "deploy": "npm run build"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
-    "@react-three/drei": "^10.5.1",
-    "@react-three/fiber": "^9.2.0",
-    "@tweenjs/tween.js": "^25.0.0",
-    "cannon-es": "^0.20.0",
-    "r3f-perf": "^7.2.3",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "@react-three/drei": "9.88.0",
+    "@react-three/fiber": "8.15.0",
+    "@tweenjs/tween.js": "21.0.0",
+    "cannon-es": "0.20.0",
+    "r3f-perf": "7.2.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "three": "0.158.0"
   }
 }

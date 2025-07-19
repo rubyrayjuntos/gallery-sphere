@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: interactive-3d-gallery
+    env: static
+    buildCommand: npm run build
+    staticPublishPath: ./interactive-3d-gallery/dist
+    envVars:
+      - key: NODE_VERSION
+        value: "18"
