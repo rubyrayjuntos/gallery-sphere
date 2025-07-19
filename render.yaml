@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: interactive-3d-gallery
+    env: static
+    buildCommand: cd interactive-3d-gallery && npm install && npm run build
+    staticPublishPath: ./interactive-3d-gallery/dist
+    domains:
+      - interactive-sphere-gallery.onrender.com
+    envVars:
+      - key: NODE_VERSION
+        value: 18
