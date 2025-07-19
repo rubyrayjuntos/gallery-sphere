@@ -2,11 +2,15 @@ services:
   - type: web
     name: interactive-3d-gallery
     env: static
-    buildCommand: cd interactive-3d-gallery && npm ci && npm run build
+    buildCommand: cd interactive-3d-gallery && npm install --no-audit --no-fund && npm run build
     staticPublishPath: ./interactive-3d-gallery/dist
     envVars:
       - key: NODE_VERSION
         value: 18
+      - key: NPM_CONFIG_AUDIT
+        value: "false"
+      - key: NPM_CONFIG_FUND
+        value: "false"
     headers:
       - path: /*
         name: X-Frame-Options
