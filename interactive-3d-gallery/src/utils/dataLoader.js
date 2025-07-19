@@ -14,12 +14,18 @@ export function useConfigLoader() {
   useEffect(() => {
     const fetchConfig = async () => {
       try {
+        console.log('Attempting to fetch config.json...');
         // Fetch config.json from the public directory
         const response = await fetch('/config.json');
+        console.log('Fetch response status:', response.status);
+        console.log('Fetch response ok:', response.ok);
+        
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          throw new Error(`Failed to fetch config.json: HTTP ${response.status} - ${response.statusText}`);
         }
+        
         const data = await response.json();
+        console.log('Config data loaded successfully:', data);
         setConfig(data);
       } catch (err) {
         console.error("Failed to load config.json:", err);

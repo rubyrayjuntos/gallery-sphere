@@ -18,102 +18,149 @@ export const ConfigContext = createContext(null);
 function App() {
   const { config, loading, error } = useConfigLoader();
   const [currentConfig, setCurrentConfig] = useState(null);
-  const [isPhysicsPaused, setIsPhysicsPaused] = useState(false);
-  const [selectedImageId, setSelectedImageId] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [detailMode, setDetailMode] = useState(false);
+  const [physicsEnabled, setPhysicsEnabled] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCatalog, setSelectedCatalog] = useState('all');
+  const [selectedSphere, setSelectedSphere] = useState('textured');
 
   useEffect(() => {
     if (config) {
+      console.log('Config loaded successfully:', config);
       setCurrentConfig(config);
     }
   }, [config]);
 
+  // Show loading spinner
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'white', backgroundColor: '#333' }}>
-        Loading configuration...
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        color: 'white', 
+        backgroundColor: '#1a1a1a',
+        fontFamily: 'Arial, sans-serif'
+      }}>
+        <div style={{ fontSize: '18px', marginBottom: '20px' }}>Loading Interactive 3D Gallery...</div>
+        <div style={{ 
+          width: '50px', 
+          height: '50px', 
+          border: '3px solid #f3f3f3', 
+          borderTop: '3px solid #3498db', 
+          borderRadius: '50%', 
+          animation: 'spin 1s linear infinite' 
+        }}></div>
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
       </div>
     );
   }
 
+  // Show detailed error information
   if (error) {
+    console.error('App error:', error);
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', color: 'red', backgroundColor: '#333' }}>
-        Error loading configuration: {error.message}
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        color: '#ff6b6b', 
+        backgroundColor: '#1a1a1a',
+        fontFamily: 'Arial, sans-serif',
+        padding: '20px',
+        textAlign: 'center'
+      }}>
+        <h2 style={{ margin: '0 0 20px 0' }}>Configuration Loading Error</h2>
+        <p style={{ marginBottom: '10px', fontSize: '16px' }}>
+          Failed to load application configuration
+        </p>
+        <p style={{ 
+          marginBottom: '20px', 
+          fontSize: '14px', 
+          color: '#ccc',
+          maxWidth: '600px'
+        }}>
+          Error: {error.message}
+        </p>
+        <button 
+          onClick={() => window.location.reload()} 
+          style={{
+            padding: '10px 20px',
+            fontSize: '16px',
+            backgroundColor: '#3498db',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer'
+          }}
+        >
+          Retry
+        </button>
       </div>
     );
   }
 
+  // Show message if config is not available
   if (!currentConfig) {
-    return null;
+    return (
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center', 
+        height: '100vh', 
+        color: 'white', 
+        backgroundColor: '#1a1a1a',
+        fontFamily: 'Arial, sans-serif'
+      }}>
+        <div>Initializing 3D Gallery...</div>
+      </div>
+    );
   }
 
   const configContextValue = {
-    config: currentConfig,
-    setCurrentConfig,
-    isPhysicsPaused,
-    setIsPhysicsPaused,
-    selectedImageId,
-    setSelectedImageId,
+    ...currentConfig,
+    selectedImage,
+    setSelectedImage,
+    detailMode,
+    setDetailMode,
+    physicsEnabled,
+    setPhysicsEnabled,
+    searchTerm,
+    setSearchTerm,
+    selectedCatalog,
+    setSelectedCatalog,
+    selectedSphere,
+    setSelectedSphere
   };
 
-  // Find the currently selected image's full data
-  const currentCatalog = currentConfig.catalogs.find(
-    (c) => c.id === currentConfig.appSettings.initialCatalogId
-  );
-  const fullSelectedImageData = selectedImageId
-    ? currentCatalog?.images.find(img => img.name === selectedImageId)
-    : null;
-  const fullSelectedImageUrl = fullSelectedImageData
-    ? `/images/${currentCatalog.folderName}/${fullSelectedImageData.file}`
-    : null;
-
   return (
-    <div className="App" style={{ width: '100vw', height: '100vh', overflow: 'hidden' }}>
-      <ConfigContext.Provider value={configContextValue}>
-        <Canvas
-          camera={{ position: [0, 0, currentConfig.appSettings.sphereRadius * 2], fov: 60 }}
-          dpr={[1, 2]}
-          shadows
-        >
-          <Perf position="top-left" />
-          <ambientLight intensity={0.5} />
-          <directionalLight position={[5, 10, 5]} intensity={1} castShadow />
-          <Environment preset="city" background />
-          <PhysicsStepper />
-          <SphereGallery />
-        </Canvas>
-        <UIControls />
-        
-        {/* Control Instructions Overlay */}
-        <div style={{
-          position: 'absolute',
-          bottom: '20px',
-          left: '20px',
-          background: 'rgba(0, 0, 0, 0.8)',
-          color: 'white',
-          padding: '15px',
-          borderRadius: '8px',
-          fontSize: '14px',
-          fontFamily: 'Arial, sans-serif',
-          maxWidth: '300px',
-          zIndex: 1000
-        }}>
-          <div style={{ fontWeight: 'bold', marginBottom: '10px' }}>Controls:</div>
-          <div style={{ marginBottom: '5px' }}>• <strong>Drag sphere</strong> to rotate</div>
-          <div style={{ marginBottom: '5px' }}>• <strong>Click image</strong> to view details</div>
-          <div style={{ marginBottom: '5px' }}>• <strong>Mouse Wheel</strong> - Move focused image closer/further</div>
-          <div style={{ fontSize: '12px', opacity: '0.8', marginTop: '8px' }}>
-            Spin the globe to position images in front of the camera, then use mouse wheel to adjust image distance from sphere surface.
-          </div>
-        </div>
-
-        <DetailViewport
-            isOpen={selectedImageId !== null}
-            imageUrl={fullSelectedImageUrl}
-            imageName={fullSelectedImageData?.name}
-        />
-      </ConfigContext.Provider>
-    </div>
+    <ConfigContext.Provider value={configContextValue}>
+      <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+        {detailMode ? (
+          <DetailViewport />
+        ) : (
+          <>
+            <Canvas camera={{ position: [0, 0, 5], fov: 60 }}>
+              <Environment preset="studio" />
+              <Perf position="top-left" />
+              <SphereGallery />
+              <PhysicsStepper />
+            </Canvas>
+            <UIControls />
+          </>
+        )}
+      </div>
+    </ConfigContext.Provider>
   );
 }
 
